@@ -428,51 +428,12 @@ class SupernoteSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			);
-
-		new Setting(containerEl)
-			.setName('Show table of contents and page headings')
-			.setDesc(
-				'When viewing .note files, show a table of contents and page number headings',
-			)
-			.addToggle((text) =>
-				text
-					.setValue(this.plugin.settings.showTOC)
-					.onChange(async (value) => {
-						this.plugin.settings.showTOC = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName('Show export buttons')
-			.setDesc(
-				'When viewing .note files, show buttons for exporting images and/or markdown files to vault. These features can still be accessed via the command pallete.',
-			)
-			.addToggle((text) =>
-				text
-					.setValue(this.plugin.settings.showExportButtons)
-					.onChange(async (value) => {
-						this.plugin.settings.showExportButtons = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName('Collapse recognized text')
-			.setDesc('When viewing .note files, hide recognized text in a collapsible element. This does not affect exported markdown.')
-			.addToggle(text => text
-				.setValue(this.plugin.settings.collapseRecognizedText)
-				.onChange(async (value) => {
-					this.plugin.settings.collapseRecognizedText = value;
-					await this.plugin.saveSettings();
-				})
-			);
 		
 		new Setting(containerEl)
-			.setName('Max image width in .note files')
-			.setDesc('Maximum width of the note image when viewing .note files, in pixels. Does not affect exported images and markdown.')
+			.setName('Note width in .note files')
+			.setDesc('Width of the note image when viewing .note files, in pixels. Does not affect exported images and markdown. Set to 0 to allow the image to scale freely.')
 			.addSlider(text => text
-				.setLimits(100, 1400, 50) // Width of an A5X/A6X2/Nomad page is 1404 px (with no upscaling)
+				.setLimits(0, 1400, 50) // Width of an A6X2/Nomad page at 100% is 1404 px
 				.setDynamicTooltip()
 				.setValue(this.plugin.settings.noteImageMaxWidth)
 				.onChange(async (value) => {
