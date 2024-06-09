@@ -8,6 +8,7 @@ interface SupernotePluginSettings {
 	showExportButtons: boolean;
 	collapseRecognizedText: boolean,
 	noteImageMaxWidth: number;
+	sideBySideView: boolean;
 }
 
 const DEFAULT_SETTINGS: SupernotePluginSettings = {
@@ -17,6 +18,7 @@ const DEFAULT_SETTINGS: SupernotePluginSettings = {
 	showExportButtons: true,
 	collapseRecognizedText: false,
 	noteImageMaxWidth: 1400, // Default to (nearly) the full width of the image
+	sideBySideView: false,
 }
 
 function generateTimestamp(): string {
@@ -162,11 +164,19 @@ export class SupernoteView extends FileView {
 			}
 		}
 
+		const columns = container.createEl("section") // TODO: rename these variables? container vs. element?
+		if (this.settings.sideBySideView) {
+			columns.setAttr('style', 'display: flex; flex-flow: row wrap') // if sideBySideView is false, flex will not be set
+		}
+
 		for (let i = 0; i < images.length; i++) {
 			const imageDataUrl = images[i].toDataURL();
 
+			const pageContainer = columns.createEl("article")
+			pageContainer.setAttr('style', 'flex: 0 1 ' + this.settings.noteImageMaxWidth + 'px')
+
 			if (images.length > 1 && this.settings.showTOC) {
-				const a = container.createEl("a");
+				const a = pageContainer.createEl("a");
 				a.id = `page${i + 1}`;
 				a.href = "#toc";
 				a.createEl("h3", { text: `Page ${i + 1}` });
@@ -178,12 +188,12 @@ export class SupernoteView extends FileView {
 
 				// If Collapse Text setting is enabled, place the text into an HTML `details` element
 				if (this.settings.collapseRecognizedText) {
-					text = container.createEl('details', {
+					text = pageContainer.createEl('details', {
 						text: '\n' + sn.pages[i].text,
 					});
 					text.createEl('summary', { text: `Page ${i + 1} Recognized Text` });
 				} else {
-					text = container.createEl('div', {
+					text = pageContainer.createEl('div', {
 						text: sn.pages[i].text,
 					});
 				}
@@ -192,7 +202,7 @@ export class SupernoteView extends FileView {
 			}
 
 			// Show the img of the page
-			const imgElement = container.createEl("img");
+			const imgElement = pageContainer.createEl("img");
 			imgElement.src = imageDataUrl;
 			if (this.settings.invertColorsWhenDark) {
 				imgElement.addClass("supernote-invert-dark");
@@ -438,6 +448,17 @@ class SupernoteSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.noteImageMaxWidth)
 				.onChange(async (value) => {
 					this.plugin.settings.noteImageMaxWidth = value;
+					await this.plugin.saveSettings();
+				})
+			);
+		
+		new Setting(containerEl)
+			.setName('Show pages side by side')
+			.setDesc('Allow viewing multiple pages horizontally in .note files. Use the width setting above to set the max width of each page.')
+			.addToggle(text => text
+				.setValue(this.plugin.settings.sideBySideView)
+				.onChange(async (value) => {
+					this.plugin.settings.sideBySideView = value;
 					await this.plugin.saveSettings();
 				})
 			);

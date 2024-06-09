@@ -13,3 +13,8 @@
 .theme-light img.supernote-invert-light {
     filter: invert(1);
 }
+
+article {
+    margin: 0.5em;
+    flex: 0 1;
+}
